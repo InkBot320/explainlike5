@@ -128,6 +128,7 @@ const server = http.createServer((request, response) => {
   serveStaticFile(response, filePath);
 });
 
-server.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  const address = server.address();
+  console.log(`Server listening on ${address.address}:${address.port}`);
 });
