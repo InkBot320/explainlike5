@@ -6,7 +6,14 @@ const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname);
 
 function getGroqApiKey() {
-  return process.env.GROQ_API_KEY;
+  const envNames = ['GROQ_API_KEY', 'API', 'API_KEY', 'OPENAI_API_KEY', 'GROQ'];
+  for (const name of envNames) {
+    if (process.env[name]) {
+      console.log(`[Env] using ${name}`);
+      return process.env[name];
+    }
+  }
+  return undefined;
 }
 
 const mimeTypes = {
