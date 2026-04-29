@@ -131,4 +131,5 @@ const server = http.createServer((request, response) => {
 server.listen(PORT, '0.0.0.0', () => {
   const address = server.address();
   console.log(`Server listening on ${address.address}:${address.port}`);
+  console.log("BODY RAW:", body);
 });
