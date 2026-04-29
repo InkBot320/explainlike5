@@ -1,0 +1,12 @@
+{
+  "name": "explainlikeim5",
+  "version": "1.0.0",
+  "description": "Explain like I'm 5 with a server-side Groq proxy.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
