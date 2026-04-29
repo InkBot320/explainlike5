@@ -5,9 +5,10 @@ const path = require('path');
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname);
 
+const ACCEPTED_API_KEY_NAMES = ['GROQ_API_KEY', 'API', 'API_KEY', 'OPENAI_API_KEY', 'GROQ'];
+
 function getGroqApiKey() {
-  const envNames = ['GROQ_API_KEY', 'API', 'API_KEY', 'OPENAI_API_KEY', 'GROQ'];
-  for (const name of envNames) {
+  for (const name of ACCEPTED_API_KEY_NAMES) {
     if (process.env[name]) {
       console.log(`[Env] using ${name}`);
       return process.env[name];
@@ -50,7 +51,9 @@ async function handleGroqProxy(request, response) {
 
   const groqApiKey = getGroqApiKey();
   if (!groqApiKey) {
-    sendJson(response, 500, { error: 'Server missing GROQ_API_KEY environment variable.' });
+    sendJson(response, 500, {
+      error: `Server missing API key. Set one of: ${ACCEPTED_API_KEY_NAMES.join(', ')}`
+    });
     return;
   }
 
