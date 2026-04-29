@@ -1,11 +1,11 @@
-services:
-  - type: web
-    name: explainlikeim5
-    env: node
-    plan: free
-    branch: main
-    buildCommand: npm install
-    startCommand: npm start
-    envVars:
-      - key: GROQ_API_KEY
-        sync: false
+  services:
+    - type: web
+      name: explainlikeim5
+      env: node
+      plan: free
+      branch: main
+      buildCommand: npm install
+      startCommand: npm start
+      envVars:
+        - key: GROQ_API_KEY
+          sync: false
