@@ -3,8 +3,11 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const PUBLIC_DIR = path.join(__dirname);
+
+function getGroqApiKey() {
+  return process.env.GROQ_API_KEY;
+}
 
 const mimeTypes = {
   '.html': 'text/html; charset=UTF-8',
@@ -24,6 +27,7 @@ function serveStaticFile(response, filePath) {
 
   fs.readFile(filePath, (err, content) => {
     if (err) {
+      console.error(`Static file missing: ${filePath}`);
       response.writeHead(404, { 'Content-Type': 'text/plain; charset=UTF-8' });
       response.end('Not found');
       return;
@@ -35,7 +39,10 @@ function serveStaticFile(response, filePath) {
 }
 
 async function handleGroqProxy(request, response) {
-  if (!GROQ_API_KEY) {
+  console.log(`[Proxy] ${request.method} ${request.url}`);
+
+  const groqApiKey = getGroqApiKey();
+  if (!groqApiKey) {
     sendJson(response, 500, { error: 'Server missing GROQ_API_KEY environment variable.' });
     return;
   }
@@ -52,10 +59,12 @@ async function handleGroqProxy(request, response) {
         return;
       }
 
+      console.log(`[Proxy] prompt=${prompt.slice(0, 100)}`);
+
       const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
+          'Authorization': `Bearer ${groqApiKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -77,13 +86,16 @@ async function handleGroqProxy(request, response) {
 
       if (!groqResponse.ok) {
         const errorMessage = data?.error || groqResponse.statusText || 'Groq API error';
+        console.error('[Proxy] Groq error:', errorMessage, data);
         sendJson(response, 502, { error: errorMessage, details: data });
         return;
       }
 
       const output = data?.choices?.[0]?.message?.content;
+      console.log('[Proxy] success');
       sendJson(response, 200, { output, raw: data });
     } catch (error) {
+      console.error('[Proxy] exception:', error);
       sendJson(response, 500, { error: error.message || 'Internal server error' });
     }
   });
@@ -91,6 +103,7 @@ async function handleGroqProxy(request, response) {
 
 const server = http.createServer((request, response) => {
   const url = new URL(request.url, `http://${request.headers.host}`);
+  console.log(`[Server] ${request.method} ${url.pathname}`);
 
   if (url.pathname === '/api/groq') {
     if (request.method === 'POST') {
